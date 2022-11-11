@@ -297,7 +297,7 @@ public class DynamicProgramming {
 
 
     /**
-     * 给定一个正整数集合arr,请把arr划分为两个集合，尽量让集合的的累加和接近<br/>
+     * 给定一个正整数集合arr,请把arr划分为两个集合，尽量让两个子集合的的累加和接近<br/>
      * 返回：最接近情况下，较小集合的累加和
      * <p/>
      * 可以将问题变为背包问题，最理想的情况是两边相等，较小集合的累加和为sum/2,如果不相等的话较小集合的累加和小于sum/2,
@@ -324,9 +324,9 @@ public class DynamicProgramming {
         }
         // 情况一：没有选择当前的数
         int r1 = splitArrProcess(arr, index + 1, rest);
-        // 情况二：选择了当前的数
         int r2 = 0;
-        if (rest >= arr[index]) { // 不能超过rest限制
+        // 情况二：选择了当前的数，只有当前数小于rest时才会有情况二
+        if (rest >= arr[index]) {
             r2 = arr[index] + splitArrProcess(arr, index + 1, rest - arr[index]);
         }
 

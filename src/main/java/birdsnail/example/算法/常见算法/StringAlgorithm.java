@@ -150,6 +150,59 @@ public class StringAlgorithm {
     }
 
 
+    /**
+     * [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0]
+     * 求出这个数组里的连续的1的最长长度, 还要知道下标
+     *
+     * @param array 输入数组
+     */
+    public static MaxLengthRes maxLength(int[] array) {
+        MaxLengthRes res = new MaxLengthRes(0, -1);
+        for (int start = 0; start < array.length; start++) {
+            if (array[start] == 1) {
+                MaxLengthRes walkRes = walk(array, start);
+                if (walkRes != null) {
+                    res = getMaxValue(res, walkRes);
+                    start = walkRes.index + walkRes.length;
+                }
+            }
+        }
+        return res;
+    }
+
+    private static MaxLengthRes walk(int[] array, int start) {
+        if (start >= array.length) {
+            return null;
+        }
+        int cur = start;
+        while (true) {
+            if (cur >= array.length) {
+                break;
+            }
+            if (array[cur] == 1) {
+                cur++;
+            } else {
+                break;
+            }
+        }
+        return new MaxLengthRes(cur - start, start);
+    }
+
+    private static MaxLengthRes getMaxValue(MaxLengthRes r1, MaxLengthRes r2) {
+        return r1.length > r2.length ? r1 : r2;
+    }
+
+    public static class MaxLengthRes {
+        int length;
+        int index;
+
+        public MaxLengthRes(int length, int index) {
+            this.length = length;
+            this.index = index;
+        }
+    }
+
+
     public static void main(String[] args) {
         System.out.println("子序列========");
         System.out.println(allSubsequence("abc"));
