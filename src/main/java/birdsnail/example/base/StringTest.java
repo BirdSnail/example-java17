@@ -2,6 +2,10 @@ package birdsnail.example.base;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.parser.ParserDelegator;
@@ -38,7 +42,15 @@ public class StringTest {
         // char c = '杨';
         // System.out.println((int) c);
 
-        System.out.println(System.getProperty("sun.arch.data.model"));
+        // System.out.println(System.getProperty("sun.arch.data.model"));
+
+        // List<Integer> integers = Arrays.asList(1, null, 2);
+        // int sum = integers.stream().mapToInt(it -> it == null ? 0 : it).sum();
+        // System.out.println(sum);
+        String month = "202203";
+        LocalDate monthTime = LocalDate.parse(month, DateTimeFormatter.ofPattern("yyyyMM")).withDayOfMonth(1);
+        Date monitorDate = Date.from(monthTime.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        System.out.println(monitorDate);
 
 
     }
