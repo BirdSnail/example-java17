@@ -1,4 +1,4 @@
-package birdsnail.example.异步;
+package birdsnail.example.thread.异步;
 
 import java.util.List;
 import java.util.concurrent.*;
