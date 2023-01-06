@@ -38,7 +38,13 @@ public class StringTest {
         // String ss = "<p style=\"text-indent:2em;\"> 为做好2017年黟县上半年部分事业单位面向社会公开招聘人员工作，根据《事业单位人事管理条例》(国务院令第652号)和省委组织部、省人力资源和社会保障厅《关于印发<安徽省事业单位公开招聘人员暂行办法>的通知》(皖人社发〔2010〕78号)等规定，经县公开招聘工作领导组研究，并报市人力资源和社会保障局核准，现就2017年黟县上半年部分事业单位公开招聘人员工作有关事项公告如下：</p> <p style=\"text-indent:2em;\"> 一、招聘原则</p> <p style=\"text-indent:2em;\"> (一)坚持面向社会、公开招聘;</p> <p style=\"text-indent:2em;\"> (二)坚持考试考察、择优聘用;</p> <p style=\"text-indent:2em;\"> (三)坚持统一组织、分工负责。</p> <p style=\"text-indent:2em;\"> 二、招聘计划</p> <p style=\"text-indent:2em;\"> 2017年度黟县上半年部分事业单位公开招聘工作人员10名(详见附件)。县委组织部、县人力资源和社会保障局于2017年5月19日在黟县政府网(http://www.yixian.gov.cn/)、黟县先锋网(http://yxxfw.yixian.gov.cn/)、黟县人力资源和社会保障网(http://yxhr.yixian.gov.cn/)及相关媒体上统一发布招聘公告。今后相关的考务信息将陆续在黟县人力资源和社会保障网(http://yxhr.yixian.gov.cn/)上发布，请考生登陆网站查询。</p> <p style=\"text-indent:2em;\"> 三、招聘条件</p> <p style=\"text-indent:2em;\"> 招聘对象主要为国家承认学历的应、历届大专及以上学历毕业生，以及符合招聘岗位条件的人员，且必须符合以下条件：</p> <p style=\"text-indent:2em;\"> (一)具有中华人民共和国国籍;</p> <p style=\"text-indent:2em;\"> (二)遵守宪法和法律;</p> <p style=\"text-indent:2em;\"> (三)具有良好的品行;</p> <p style=\"text-indent:2em;\"> (四)岗位所需的专业或技能条件;</p> <p style=\"text-indent:2em;\"> (五)适应岗位要求的身体条件;</p>";
         // System.out.println(htmlParse(s));
         // System.out.println(htmlParse(ss));
-        //
+        String src = "一种采用nano-CeO<Sub>2</Sub>/H<Sub>2</Sub>O<Sub>2</Sub>/O<Sub>3</Sub>体系处理酸性难降解废水的方法";
+        System.out.println("原始内容-->" + src);
+        // System.out.println("处理后的内容-->" + htmlParse(src));
+        System.out.println("处理后并移除换行的内容-->" + htmlParse(src).replaceAll("[/|?%.]", "_"));
+        // System.out.println("====");
+        System.out.println("爱信诺?CeO2/H2O2/O3.fsf%132|aaa".replaceAll("[/|?%.]", "_"));
+
         // char c = '杨';
         // System.out.println((int) c);
 
@@ -62,6 +68,7 @@ public class StringTest {
     private static String htmlParse(String str) {
         ParserDelegator parserDelegator = new ParserDelegator();
         HtmlTextCallBack callBack = new HtmlTextCallBack();
+        // HtmlTextCallBack callBack = new HtmlTextCallBack("_"); // 可以指定分隔符
         try (InputStream inputStream = new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8));
              Reader reader = new InputStreamReader(inputStream)) {
             parserDelegator.parse(reader, callBack, true);
@@ -77,9 +84,21 @@ public class StringTest {
 
         private StringBuilder sb = new StringBuilder();
 
+        private String delimiter;
+
+        public HtmlTextCallBack() {
+        }
+
+        public HtmlTextCallBack(String delimiter) {
+            this.delimiter = delimiter;
+        }
+
         @Override
         public void handleText(char[] data, int pos) {
-            sb.append(data).append("\n");
+            sb.append(data);
+            if (delimiter != null) {
+                sb.append(delimiter);
+            }
         }
 
         public String getText() {

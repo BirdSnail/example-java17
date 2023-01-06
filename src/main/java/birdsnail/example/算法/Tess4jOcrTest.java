@@ -1,9 +1,4 @@
-/**
- * Copyright©2022,QiZhiDaoNetworkCo.,Ltd.Allrights
- * reserved.
- * QiZhiDaoPROPRIETARY/CONFIDENTIAL.Useissubjecttolicense
- * terms.
- */
+
 package birdsnail.example.算法;
 
 import java.io.File;
