@@ -36,7 +36,7 @@ public class GreedyOperation {
     /**
      * 一条街道上有墙和住户，墙上不可以放灯，住户可以放灯也可以不放。每盏灯只能照亮它前后的位置，求使用最少的灯照亮整条街道上的住户。<br>
      *
-     * @param srcStreet "X": 代表墙，"_": 代表住户
+     * @param srcStreet "X": 代表墙，"_": 代表住户。[x,x,_,x,_,x,x,_,_,x]
      */
     public static List<Integer> leastLight(List<String> srcStreet) {
         ParamUtil.checkNotNull(srcStreet);

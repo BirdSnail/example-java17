@@ -202,16 +202,53 @@ public class StringAlgorithm {
         }
     }
 
+    /**
+     * 给定字符串 s 和 t ，判断 s 是否为 t 的子序列。
+     * <p>
+     * 字符串的一个子序列是原始字符串删除一些（也可以不删除）字符而不改变剩余字符相对位置形成的新字符串。（例如，"ace"是"abcde"的一个子序列，而"aec"不是）。
+     *
+     * @param s 字符串1
+     * @param t 字符串2
+     * @return true 是子序列
+     */
+    public static boolean isSubsequence(String s, String t) {
+        if (t.length() < s.length()) {
+            return false;
+        }
+        char[] chars = s.toCharArray();
+        char[] tChars = t.toCharArray();
+        int start = 0;
+        for (char sCh : chars) {
+            start = findChar(tChars, start, sCh);
+            if (start == -1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static int findChar(char[] chars, int start, char target) {
+        for (int i = start; i < chars.length; i++) {
+            if (chars[i] == target) {
+                i++;
+                return i;
+            }
+        }
+        return -1;
+    }
+
 
     public static void main(String[] args) {
-        System.out.println("子序列========");
-        System.out.println(allSubsequence("abc"));
-        System.out.println("全排列1=======");
-        System.out.println(permutation1("abc"));
-        System.out.println("全排列2=======");
-        System.out.println(permutation2("abcd"));
-        System.out.println(permutation1("abcd"));
-        System.out.println(permutation3("abcc"));
+        // System.out.println("子序列========");
+        // System.out.println(allSubsequence("abc"));
+        // System.out.println("全排列1=======");
+        // System.out.println(permutation1("abc"));
+        // System.out.println("全排列2=======");
+        // System.out.println(permutation2("abcd"));
+        // System.out.println(permutation1("abcd"));
+        // System.out.println(permutation3("abcc"));
+
+        System.out.println("是否子序列:" + isSubsequence("axc", "ahbgdc"));
     }
 
 }

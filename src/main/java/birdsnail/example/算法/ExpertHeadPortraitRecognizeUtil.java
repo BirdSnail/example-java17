@@ -1,7 +1,5 @@
 package birdsnail.example.算法;
 
-import com.alibaba.excel.EasyExcel;
-
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -14,13 +12,15 @@ import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
+import com.alibaba.excel.EasyExcel;
+
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ExpertHeadPortraitRecognizeUtil {
 
-    public static String dir = "/Users/hufangxia/supercode/qzd/orc-demo/专家头像（9190个）";
+    public static String dir = "/Users/hufangxia/supercode/orc-demo/专家头像（9190个）";
 
     public static void main(String args[]) throws IOException {
 
