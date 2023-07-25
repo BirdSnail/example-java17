@@ -237,6 +237,16 @@ public class StringAlgorithm {
         return -1;
     }
 
+    /**
+     * 给你两个二进制字符串 a 和 b ，以二进制字符串的形式返回它们的和。
+     *
+     * @param a "1010"
+     * @param b "1011"
+     * @return "10101"
+     */
+    public static String addBinary(String a, String b) {
+        return null;
+    }
 
     public static void main(String[] args) {
         // System.out.println("子序列========");

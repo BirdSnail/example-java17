@@ -89,11 +89,24 @@
             <artifactId>guava</artifactId>
             <version>31.1-jre</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.sejda.imageio</groupId>-->
-<!--            <artifactId>webp-imageio</artifactId>-->
-<!--            <version>0.1.6</version>-->
-<!--        </dependency>-->
+
+        <dependency>
+            <groupId>com.twelvemonkeys.imageio</groupId>
+            <artifactId>imageio-webp</artifactId>
+            <version>3.9.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itext7-core</artifactId>
+            <version>7.2.3</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>cleanup</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+
     </dependencies>
 
     <build>
