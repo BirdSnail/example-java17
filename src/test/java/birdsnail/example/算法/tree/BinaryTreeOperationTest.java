@@ -1,5 +1,7 @@
 package birdsnail.example.算法.tree;
 
+import birdsnail.example.算法.数据结构.tree.BinaryTreeOperation;
+import birdsnail.example.算法.数据结构.tree.TreeNode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

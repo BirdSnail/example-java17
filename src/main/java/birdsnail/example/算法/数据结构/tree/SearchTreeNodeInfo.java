@@ -1,4 +1,4 @@
-package birdsnail.example.算法.tree;
+package birdsnail.example.算法.数据结构.tree;
 
 
 public record SearchTreeNodeInfo(

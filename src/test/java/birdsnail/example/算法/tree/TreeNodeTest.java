@@ -1,8 +1,7 @@
 package birdsnail.example.算法.tree;
 
+import birdsnail.example.算法.数据结构.tree.TreeNode;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class TreeNodeTest {
 
