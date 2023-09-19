@@ -1,14 +1,13 @@
 package birdsnail.example.算法.数据结构.tree;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * b+树
@@ -55,6 +54,56 @@ public class BPlusTree {
             return a.compareTo(b);
         };
         return Arrays.binarySearch(dps, 0, numPairs, new DictionaryPair(t, 0), c);
+    }
+
+    /**
+     * 打印b+树
+     */
+    public void printTree() {
+        if (firstLeaf != null) {
+            Node head = firstLeaf;
+            List<Node> levelHead = new ArrayList<>();
+            while (head != null) {
+                levelHead.add(head);
+                head = head.parent;
+            }
+
+            List<String> content = new ArrayList<>();
+            for (int i = levelHead.size() - 1; i >= 0; i--) {
+                StringBuilder sb = new StringBuilder();
+                if (levelHead.get(i) instanceof LeafNode cur) {
+                    while (cur != null) {
+                        sb.append(cur);
+                        cur = cur.rightSibling;
+                        if (cur != null) {
+                            sb.append(" || ");
+                        }
+                    }
+                    content.add(sb.toString());
+                } else if (levelHead.get(i) instanceof InternalNode in) {
+                    while (in != null) {
+                        sb.append(in);
+                        in = in.rightSibling;
+                        if (in != null) {
+                            sb.append(" || ");
+                        }
+                    }
+                    content.add(sb.toString());
+                }
+            }
+
+            String leafLine = content.get(content.size() - 1);
+            for (int i = 0; i < content.size(); i++) {
+                String line = content.get(i);
+                if (i == content.size() - 1) {
+                    System.out.printf("第%d层：%s", i + 1, line);
+                } else {
+                    String centerLine = StringUtils.center(line, leafLine.length());
+                    System.out.printf("第%d层：%s", i + 1, centerLine);
+                }
+                System.out.println();
+            }
+        }
     }
 
     /**
@@ -166,53 +215,72 @@ public class BPlusTree {
         // Borrow:
         else if (in.leftSibling != null && in.leftSibling.isLendable()) {
             sibling = in.leftSibling;
+            int indexInParent = parent.findIndexOfPointer(in);
+
+            addFirst(in.keys, parent.keys[indexInParent - 1]);
+
+            // 从兄弟节点借用一个子节点。Copy root key and pointer into parent
+            int borrowedKey = sibling.keys[sibling.degree - 2];
+            Node pointer = sibling.childPointers[sibling.degree - 1];
+            pointer.parent = in;
+            addFirst(in.childPointers, pointer);
+            in.degree++;
+
+            // Copy borrowedKey into root
+            parent.keys[indexInParent - 1] = borrowedKey;
+
+            // Delete key and pointer from sibling
+            remove(sibling.keys, sibling.degree - 2);
+            remove(sibling.childPointers, sibling.degree - 1);
+            sibling.degree--;
+            return;
         } else if (in.rightSibling != null && in.rightSibling.isLendable()) {
             sibling = in.rightSibling;
+            int indexInParent = parent.findIndexOfPointer(in);
 
             // Copy 1 key and pointer from sibling (atm just 1 key)
             int borrowedKey = sibling.keys[0];
             Node pointer = sibling.childPointers[0];
+            pointer.parent = in;
 
-            // Copy root key and pointer into parent
-            in.keys[in.degree - 1] = parent.keys[0];
+            // 从兄弟节点借用一个子节点。Copy root key and pointer into parent
+            in.keys[in.degree - 1] = parent.keys[indexInParent];
             in.childPointers[in.degree] = pointer;
+            in.degree++;
 
             // Copy borrowedKey into root
-            parent.keys[0] = borrowedKey;
+            parent.keys[indexInParent] = borrowedKey;
 
             // Delete key and pointer from sibling
-            sibling.removePointer(0);
-            Arrays.sort(sibling.keys);
-            sibling.removePointer(0);
-            shiftDown(in.childPointers, 1);
+            remove(sibling.keys, 0);
+            remove(sibling.childPointers, 0);
+            sibling.degree--;
+            return;
         }
 
         // Merge:
         else if (in.leftSibling != null && in.leftSibling.isMergeable()) {
-            // ignore
-        } else if (in.rightSibling != null && in.rightSibling.isMergeable()) {
-            sibling = in.rightSibling;
+            sibling = in.leftSibling;
+            int indexInParent = parent.findIndexOfPointer(in);
 
-            // Copy rightmost key in parent to beginning of sibling's keys &
-            // delete key from parent
-            sibling.keys[sibling.degree - 1] = parent.keys[parent.degree - 2];
-            Arrays.sort(sibling.keys, 0, sibling.degree);
-            parent.keys[parent.degree - 2] = null;
+            mergeLeft(sibling, in, indexInParent);
 
-            // Copy in's child pointer over to sibling's list of child pointers
-            for (int i = 0; i < in.childPointers.length; i++) {
-                if (in.childPointers[i] != null) {
-                    sibling.prependChildPointer(in.childPointers[i]);
-                    in.childPointers[i].parent = sibling;
-                    in.removePointer(i);
-                }
+            sibling.rightSibling = in.rightSibling;
+            if (sibling.rightSibling != null) {
+                sibling.rightSibling.leftSibling = sibling;
             }
 
-            // Delete child pointer from grandparent to deficient node
-            parent.removePointer(in);
+        } else if (in.rightSibling != null && in.rightSibling.isMergeable()) {
+            sibling = in.rightSibling;
+            int indexInParent = parent.findIndexOfPointer(in);
 
-            // Remove left sibling
-            sibling.leftSibling = in.leftSibling;
+            mergeRight(in, sibling, indexInParent);
+
+            // Remove right sibling
+            in.rightSibling = sibling.rightSibling;
+            if (sibling.rightSibling != null) {
+                sibling.rightSibling.leftSibling = in;
+            }
         }
 
         // Handle deficiency a level up if it exists
@@ -221,12 +289,39 @@ public class BPlusTree {
         }
     }
 
+    private void mergeLeft(InternalNode left, InternalNode node, int indexInParent) {
+        // 父节点key下移
+        left.keys[left.degree - 1] = left.parent.keys[indexInParent - 1];
+        remove(left.parent.keys, indexInParent - 1);
+        remove(left.parent.childPointers, indexInParent);
+        left.parent.degree--;
+
+        for (int i = 0; i < node.degree; i++) {
+            if (node.keys[i] != null) {
+                Integer key = node.keys[i];
+                left.keys[left.degree] = key;
+            }
+            if (node.childPointers[i] != null) {
+                left.childPointers[left.degree] = node.childPointers[i];
+                left.childPointers[left.degree].parent = left; // 更新父节点
+                left.degree++;
+            }
+        }
+    }
+
+    private <T> void addFirst(T[] arr, T ele) {
+        for (int i = arr.length - 1; i >= 1; i--) {
+            arr[i] = arr[i - 1];
+        }
+        arr[0] = ele;
+    }
+
     /**
      * This is a simple method that determines if the B+ tree is empty or not.
      *
      * @return a boolean indicating if the B+ tree is empty or not
      */
-    private boolean isEmpty() {
+    public boolean isEmpty() {
         return firstLeaf == null;
     }
 
@@ -286,7 +381,7 @@ public class BPlusTree {
      *
      * @param dictionary: a list of DictionaryPair objects
      */
-    private void sortDictionary(DictionaryPair[] dictionary) {
+    private static void sortDictionary(DictionaryPair[] dictionary) {
         Arrays.sort(dictionary, (o1, o2) -> {
             if (o1 == null && o2 == null) {
                 return 0;
@@ -484,7 +579,7 @@ public class BPlusTree {
                     LeafNode sibling;
                     InternalNode parent = ln.parent;
 
-                    // Borrow: First, check the left sibling, then the right sibling
+                    // 先从左兄弟节点借用一个元素，不行的话就向右兄弟借。Borrow: First, check the left sibling, then the right sibling
                     if (ln.leftSibling != null &&
                             ln.leftSibling.parent == ln.parent &&
                             ln.leftSibling.isLendable()) {
@@ -495,12 +590,11 @@ public class BPlusTree {
 						/* Insert borrowed dictionary pair, sort dictionary,
 						   and delete dictionary pair from sibling */
                         ln.insert(borrowedDP);
-                        sortDictionary(ln.dictionary);
                         sibling.delete(sibling.numPairs - 1);
 
                         // Update key in parent if necessary
                         int pointerIndex = findIndexOfPointer(parent.childPointers, ln);
-                        if (!(borrowedDP.key >= parent.keys[pointerIndex - 1])) {
+                        if (!(borrowedDP.key >= parent.keys[pointerIndex - 1])) { // 关键字个数比子节点数少1，所以要减一
                             parent.keys[pointerIndex - 1] = ln.dictionary[0].key;
                         }
 
@@ -513,6 +607,7 @@ public class BPlusTree {
 
 						/* Insert borrowed dictionary pair, sort dictionary,
 					       and delete dictionary pair from sibling */
+                        ln.dictionary[dpIndex] = ln.dictionary[dpIndex + 1]; // 后一个元素前移
                         ln.insert(borrowedDP);
                         sibling.delete(0);
                         sortDictionary(sibling.dictionary);
@@ -533,12 +628,15 @@ public class BPlusTree {
                         sibling = ln.leftSibling;
                         int pointerIndex = findIndexOfPointer(parent.childPointers, ln);
 
-                        // Remove key and child pointer from parent
-                        parent.removeKey(pointerIndex - 1);
+                        sibling.merge(ln);
+                        remove(parent.keys, pointerIndex - 1);
                         parent.removePointer(ln);
 
                         // Update sibling pointer
                         sibling.rightSibling = ln.rightSibling;
+                        if (ln.rightSibling != null) {
+                            ln.rightSibling.leftSibling = sibling;
+                        }
 
                         // Check for deficiencies in parent
                         if (parent.isDeficient()) {
@@ -553,13 +651,18 @@ public class BPlusTree {
                         int pointerIndex = findIndexOfPointer(parent.childPointers, ln);
 
                         // Remove key and child pointer from parent
-                        parent.removeKey(pointerIndex);
-                        parent.removePointer(pointerIndex);
+                        remove(parent.keys, pointerIndex);
+                        remove(parent.childPointers, pointerIndex);
+                        parent.degree--;
+
+                        sibling.merge(ln);
 
                         // Update sibling pointer
                         sibling.leftSibling = ln.leftSibling;
                         if (sibling.leftSibling == null) {
                             firstLeaf = sibling;
+                        } else {
+                            sibling.leftSibling.rightSibling = sibling;
                         }
 
                         if (parent.isDeficient()) {
@@ -752,8 +855,12 @@ public class BPlusTree {
      * This class represents a general node within the B+ tree and serves as a
      * superclass of InternalNode and LeafNode.
      */
-    public static class Node {
+    public static abstract class Node {
         InternalNode parent;
+
+        int level;
+
+        public abstract void print();
     }
 
     /**
@@ -873,7 +980,7 @@ public class BPlusTree {
          * can give away a dictionary pair if its current degree is above the
          * specified minimum.
          *
-         * @return a boolean indicating whether or not the InternalNode has
+         * @return a boolean indicating whether the InternalNode has
          * enough dictionary pairs in order to give one away.
          */
         private boolean isLendable() {
@@ -946,14 +1053,94 @@ public class BPlusTree {
          * @param pointer: the Node pointer to be removed from childPointers
          */
         private void removePointer(Node pointer) {
+            int index = -1;
             for (int i = 0; i < childPointers.length; i++) {
                 if (childPointers[i] == pointer) {
                     this.childPointers[i] = null;
+                    index = i;
+                    break;
                 }
             }
+            childPointers = ArrayUtils.remove(childPointers, index);
             this.degree--;
         }
 
+        @Override
+        public void print() {
+
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("[");
+            for (int i = 0; i < degree - 1; i++) {
+                Integer key = keys[i];
+                sb.append("--").append(key);
+                if (i == degree - 2) {
+                    sb.append("--");
+                }
+            }
+            sb.append("]");
+            return sb.toString();
+        }
+
+        // 与传入进来的内部节点合并, 增加key，增加children，更改parent
+        public void merge(InternalNode in) {
+            if (!isMergeable() || !in.isDeficient()) {
+                throw new RuntimeException("内部节点达不到合并要求");
+            }
+            for (int i = 0; i < in.degree; i++) {
+                Integer key = in.keys[i];
+                if (key != null) {
+                    this.keys[this.degree - 1] = key;
+                }
+                Node cp = in.childPointers[i];
+                if (cp != null) {
+                    this.prependChildPointer(cp);
+                    cp.parent = this;
+                    in.removePointer(cp);
+                }
+            }
+
+            Arrays.sort(this.keys, 0, degree - 1);
+        }
+
+    }
+
+    // 将node合并到left节点上
+    public void mergeRight(InternalNode node, InternalNode right, int indexInParent) {
+        // 父节点key下移
+        node.keys[node.degree - 1] = node.parent.keys[indexInParent];
+        remove(node.parent.keys, indexInParent);
+        remove(node.parent.childPointers, indexInParent + 1);
+        node.parent.degree--;
+
+        for (int i = 0; i < right.degree; i++) {
+            if (i < right.degree - 1 && right.keys[i] != null) {
+                Integer key = right.keys[i];
+                node.keys[node.degree] = key;
+            }
+            if (right.childPointers[i] != null) {
+                node.childPointers[node.degree] = right.childPointers[i];
+                node.childPointers[node.degree].parent = node; // 更新父节点
+                node.degree++;
+            }
+        }
+
+    }
+
+    private <T> void remove(T[] arr, int index) {
+        for (int i = index; i < arr.length; i++) {
+            if (i + 1 == arr.length) {
+                arr[i] = null;
+                return;
+            }
+            arr[i] = arr[i + 1];
+            if (arr[i] == null) {
+                return;
+            }
+        }
     }
 
     /**
@@ -1040,7 +1227,7 @@ public class BPlusTree {
                 // Insert dictionary pair, increment numPairs, sort dictionary
                 this.dictionary[numPairs] = dp;
                 numPairs++;
-                Arrays.sort(this.dictionary, 0, numPairs);
+                sortDictionary(this.dictionary);
                 return true;
             }
         }
@@ -1091,6 +1278,44 @@ public class BPlusTree {
         }
 
 
+        @Override
+        public void print() {
+
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("[");
+            for (int i = 0; i < numPairs; i++) {
+                DictionaryPair pair = dictionary[i];
+                sb.append("(").append(pair.key).append(",")
+                        .append(pair.value).append(")");
+                if (i != numPairs - 1) {
+                    sb.append("->");
+                }
+            }
+            sb.append("]");
+            return sb.toString();
+        }
+
+        /**
+         * 传入的叶子节点进行合并
+         *
+         * @param ln 被合并的叶子节点
+         */
+        public void merge(LeafNode ln) {
+            if (!isMergeable() || !ln.isDeficient()) {
+                throw new RuntimeException("没有达到合并要求");
+            }
+            DictionaryPair[] lnDict = ln.dictionary;
+            for (int i = 0; i < ln.numPairs + 1; i++) {
+                if (lnDict[i] != null) {
+                    this.dictionary[this.numPairs++] = lnDict[i];
+                }
+            }
+            sortDictionary(this.dictionary);
+        }
     }
 
     /**
