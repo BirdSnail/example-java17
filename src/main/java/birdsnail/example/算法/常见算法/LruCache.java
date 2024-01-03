@@ -103,6 +103,8 @@ public class LruCache {
         DoubleLinkNode<Object> next = node.getNext();
         prev.setNext(next);
         next.setPrev(prev);
+        node.setNext(null);
+        node.setPrev(null);
 
         Integer key = node.getKey();
         keyMap.remove(key);
