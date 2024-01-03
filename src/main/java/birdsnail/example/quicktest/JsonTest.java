@@ -1,7 +1,9 @@
 package birdsnail.example.quicktest;
 
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
+
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.TypeReference;
+import lombok.Data;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -10,8 +12,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import lombok.Data;
 
 /**
  * 解析并按照不同统计指标排名

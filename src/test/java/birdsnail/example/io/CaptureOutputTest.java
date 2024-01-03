@@ -1,14 +1,13 @@
 package birdsnail.example.io;
 
-import com.alibaba.fastjson.JSONObject;
 
+import birdsnail.example.entity.Person;
+import com.alibaba.fastjson2.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-
-import birdsnail.example.entity.Person;
 
 class CaptureOutputTest {
 
