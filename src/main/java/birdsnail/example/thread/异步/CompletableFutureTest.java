@@ -1,10 +1,14 @@
 package birdsnail.example.thread.异步;
 
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import lombok.Data;
-
+@Slf4j
 public class CompletableFutureTest {
 
     public static void main(String[] args) throws InterruptedException, ExecutionException {
@@ -31,9 +35,11 @@ public class CompletableFutureTest {
         // );
         // System.out.println("ss");
         // Thread.sleep(10000000L);
-        System.out.println("----end----------");
-        // forkJoinTest();
-        forkJoinTest2();
+//        System.out.println("----end----------");
+//        // forkJoinTest();
+//        forkJoinTest2();
+
+        testThenApply();
     }
 
 
@@ -120,8 +126,35 @@ public class CompletableFutureTest {
         return "jishisjishi ";
     }
 
+
+    public static void testThenApply() {
+        AtomicInteger integer = new AtomicInteger();
+        List<String> list = new CopyOnWriteArrayList<>();
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> getNum(integer))
+                    .thenAccept(n -> list.add("hello--" + n)) // 只处理任务成功时候，失败不处理
+                    .exceptionally(throwable -> {
+                        log.error(throwable.getMessage());
+                        return null;
+                    });
+            futures.add(future);
+        }
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        System.out.println(list);
+    }
+
+    private static Integer getNum(AtomicInteger integer) {
+        int num = integer.incrementAndGet();
+        if (num % 2 == 0) {
+            throw new RuntimeException(num + "是偶数");
+        }
+        return num;
+    }
+
     @Data
-    static class DataInfo{
+    static class DataInfo {
         private Object 技术信息;
         private Object 第一页成果;
         private Object 第一页专家;
