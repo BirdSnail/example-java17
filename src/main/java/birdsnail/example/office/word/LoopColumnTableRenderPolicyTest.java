@@ -1,4 +1,4 @@
-package birdsnail.example.excel;
+package birdsnail.example.office.word;
 
 import birdsnail.example.entity.Goods;
 import birdsnail.example.entity.Labor;
