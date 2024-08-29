@@ -17,13 +17,24 @@ import java.util.function.Consumer;
 public class ExcelNoModelDataHandler {
 
     /**
-     * 处理excel数据
+     * 处理excel数据，从首行开始
      *
      * @param fileName       excel
      * @param recordsHandler 处理逻辑
      */
     public static void handleAll(String fileName, Consumer<List<Map<Integer, String>>> recordsHandler) {
-        EasyExcel.read(fileName, new NoModelDataListener(recordsHandler)).sheet().doRead();
+        handleAll(fileName, 0, recordsHandler);
+    }
+
+    /**
+     * 处理excel数据，跳过指定的表头行
+     *
+     * @param fileName       excel
+     * @param headRowNumber  表头行数
+     * @param recordsHandler 处理逻辑
+     */
+    public static void handleAll(String fileName, int headRowNumber, Consumer<List<Map<Integer, String>>> recordsHandler) {
+        EasyExcel.read(fileName, new NoModelDataListener(recordsHandler)).sheet().headRowNumber(headRowNumber).doRead();
     }
 
     @Slf4j
