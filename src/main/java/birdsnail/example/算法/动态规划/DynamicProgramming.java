@@ -1,9 +1,9 @@
 package birdsnail.example.算法.动态规划;
 
+import birdsnail.example.entity.Point;
+
 import java.util.*;
 import java.util.function.Supplier;
-
-import birdsnail.example.entity.Point;
 
 /**
  * 动态规划
@@ -130,28 +130,29 @@ public class DynamicProgramming {
         return process(firstCharArr, secondCharArr, firstCharArr.length - 1, secondCharArr.length - 1);
     }
 
-    private static int process(char[] firstCharArr, char[] secondCharArr, int N, int M) {
-        if (N == 0 && M == 0) {// 两个字符串都为单字符
-            return firstCharArr[N] == secondCharArr[M] ? 1 : 0;
+    // str1[0,i]与str2[0,j]的最长公共子序列
+    private static int process(char[] str1, char[] str2, int i, int j) {
+        if (i == 0 && j == 0) {// 两个字符串都为单字符
+            return str1[i] == str2[j] ? 1 : 0;
         }
-        if (N == 0) {// 第一个字符串为单字符
-            if (firstCharArr[N] == secondCharArr[M]) {
+        if (i == 0) {// 第一个字符串为单字符
+            if (str1[i] == str2[j]) {
                 return 1;
             } else {
-                return process(firstCharArr, secondCharArr, 0, M - 1);
+                return process(str1, str2, 0, j - 1);
             }
         }
-        if (M == 0) {// 第二个字符串为单字符
-            if (firstCharArr[N] == secondCharArr[M]) {
+        if (j == 0) {// 第二个字符串为单字符
+            if (str1[i] == str2[j]) {
                 return 1;
             } else {
-                return process(firstCharArr, secondCharArr, N - 1, 0);
+                return process(str1, str2, i - 1, 0);
             }
         }
-        // N,M都不为0
-        int r1 = process(firstCharArr, secondCharArr, N - 1, M - 1) + (firstCharArr[N] == secondCharArr[M] ? 1 : 0);// 情况1
-        int r2 = process(firstCharArr, secondCharArr, N - 1, M); // 情况2
-        int r3 = process(firstCharArr, secondCharArr, N, M - 1); // 情况3
+        // i,M都不为0
+        int r1 = process(str1, str2, i - 1, j - 1) + (str1[i] == str2[j] ? 1 : 0);// 情况1，最长公共子序列既不以i位置的字符结尾，也不以j位置的字符结尾
+        int r2 = process(str1, str2, i - 1, j); // 情况2
+        int r3 = process(str1, str2, i, j - 1); // 情况3
         return Math.max(r1, Math.max(r2, r3)); // 取三种情况中的最大值
     }
 
